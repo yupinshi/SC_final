@@ -22,7 +22,7 @@ To perform parametery by changing the height of the active layer and the passive
 * Generate an excel file that lists the important parameters in the Parameter.txt file
 
 ## How to run the code
-Both heights of the active layer and the passive layer are set to different values to generate the geometry for parameter study. In the first section, global constants defined. Change the height_pas and height_act in this section to 0.0004/0.0008/0.0012/0.0016.
+Both heights of the active layer and the passive layer are set to different values to generate the geometry for parameter study. Change the height_pas and height_act in the first section, where global constants are defined, to 0.0004/0.0008/0.0012/0.0016 to generate the txt file and image for parameter study.
 ```
 height_pas = 0.0004
 height_act = 0.0004
