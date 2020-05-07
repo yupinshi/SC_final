@@ -12,11 +12,15 @@ from openpyxl.styles import PatternFill, Font
 Define global constants
 '''
 length = 0.015
+# Parameter study is performed by changing the height of the passive layer
+# and active layer
+# height_pas and heigh_act can be set to 0.0004/0.0008/0.0012/0.0016
 height_pas = 0.0004
-height_act = 0.0008
+height_act = 0.0004
 height = height_pas + height_act
-n_Elem_y_pas = 2
-n_Elem_y_act = 4
+meshsize = 0.0002
+n_Elem_y_pas = int(height_pas / meshsize)
+n_Elem_y_act = int(height_act / meshsize)
 n_Elem_y = n_Elem_y_pas + n_Elem_y_act
 n_Elem_x = 75
 meshsize_y = (height_pas + height_act) / n_Elem_y
@@ -216,7 +220,7 @@ def sets_for_BC(node):
         \n %d' % list(node.keys())[0], file=f)
 
 
-def draw_BC():
+def draw_BC(extension):
     '''
     Output the certain parameters in the parameter file to an excel file
 
@@ -265,7 +269,7 @@ def draw_BC():
                    rect_y_end + tri * 2)],
                  fill=(255, 0, 0))
 
-    im.save('output_BC.jpg')
+    im.save('output_BC_%s.jpg' % filename_extention)
 
 
 def parameter(parameters_file):
@@ -317,8 +321,10 @@ def parameter(parameters_file):
 
 if __name__ == "__main__":
     # Output an txt file for geometry information
-    f = open('output_geometry.txt', 'w')
-    geometry_file = 'output_geometry.txt'
+    filename_extention = '%s-%s' % (str(list(str(height_pas).split('.'))[-1]),
+                                    str(list(str(height_act).split('.'))[-1]))
+    f = open('output_geo_%s.txt' % filename_extention, 'w')
+    geometry_file = 'output_geo_%s.txt' % filename_extention
     node = node()
     elem_pas, elem_act = elem()
     dummmy_elem(elem_act)
@@ -326,7 +332,7 @@ if __name__ == "__main__":
     f.close()
 
     # Output an image file for boundary conditions
-    draw_BC()
+    draw_BC(filename_extention)
 
     # Output an excel file for parameters in the file
     parameter('Parameter.txt')
