@@ -1,9 +1,16 @@
+'''
+EN.540.635 Software Carpentry
+Final Project
+Yupin Shi
+'''
+
 from PIL import Image, ImageDraw
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 
-
-# Defind global constant
+'''
+Define global constants
+'''
 length = 0.015
 height_pas = 0.0004
 height_act = 0.0008
@@ -15,29 +22,26 @@ n_Elem_x = 75
 meshsize_y = (height_pas + height_act) / n_Elem_y
 meshsize_x = length / n_Elem_x
 c_dummy = 10000
-
-# 4 Node Quad
 n_Node_x = n_Elem_x + 1
 n_Node_y = n_Elem_y + 1
 
-'''
-Define nodes
-'''
+
 def node():
+    '''
+    Define nodes coordinates for the active layer and the pasive layer
 
-    # n_Node_y_pas = n_Elem_y_pas + 1
+    **Parameters**
+        global variables
 
-    # n_Node_all = n_Node_x * n_Node_y
-    # n1 = 1
-    # n2 = n_Node_x
-    # n3 = n_Node_x * n_Node_y
-    # n4 = n_Node_x * n_Elem_y + 1
-
+    **Returns**
+        node: *dict*
+        print in .txt file
+    '''
     coor_y = - meshsize_y
     node = dict()
     n_Node = 0
+    # Define the coordinate of nodes based on the row and column of the mesh
     for row_Node in range(1, n_Node_y + 1):
-        # print(row_Node)
         coor_x = - meshsize_x
         coor_y += meshsize_y
         column_Node = 0
@@ -49,17 +53,27 @@ def node():
     return node
 
 
-'''
-Define elements for passive layer, active layer
-'''
-
-
 def elem():
+    '''
+    Define elements for the passive layer and the active layer
+
+    **Parameters**
+        global variables
+
+    **Returns**
+        elem_pas, elem_act: *dict*
+        print in .txt file
+    '''
+
+    # Print the heading for element nodes of the passive layer
     print('**\
          \n** The following are elements for the passive layer\
          \n**\
          \n*Element, type=CPE4H', file=f)
     n_Elem = 0
+
+    # Define and print the element nodes of the passive layer based on the row
+    # and column of the element
     elem_pas = dict()
     for row_Elem in range(1, n_Elem_y_pas + 1):
         for column_Elem in range(1, n_Elem_x + 1):
@@ -72,21 +86,24 @@ def elem():
                                       Node_right_top, Node_left_top)})
             print(n_Elem, ', ', Node_left_bot, ', ', Node_right_bot,
                   ', ', Node_right_top, ', ', Node_left_top, sep='', file=f)
-    # print(elem_pas)
     print('*Nset, nset=PassiveSet, generate\
          \n%d, %d, 1' % (list(elem_pas.values())[0][0],
                          list(elem_pas.values())[-1][-2]), file=f)
     print('*Elset, elset=PassiveSet, generate\
          \n%d, %d, 1' % (list(elem_pas.keys())[0],
                          list(elem_pas.keys())[-1]), file=f)
+
+    # Print the heading for element nodes of the active layer
     print('**\
          \n** The following aare the UEL elements for the active layer\
          \n**\
          \n*User Element,Nodes=4,Type=U1,Iproperties=2,Properties=14,\
-Coordinates=2,Variables=4,Unsymm\
+            Coordinates=2,Variables=4,Unsymm\
          \n 1,2,11,12\
          \n*Element, type=U1', file=f)
 
+    # Define and print the nodes of each element of the active layer based
+    # on the row and column of the element
     elem_act = dict()
     for row_Elem in range(n_Elem_y_pas + 1, n_Elem_y + 1):
         for column_Elem in range(1, n_Elem_x + 1):
@@ -108,12 +125,18 @@ Coordinates=2,Variables=4,Unsymm\
     return elem_pas, elem_act
 
 
-'''
-Define dummy elements
-'''
-
-
 def dummmy_elem(elem_act):
+    '''
+    Define dummy elements
+
+    **Parameters**
+        global variables
+        elem_act: *dict*
+
+    **Returns**
+        print in .txt file
+    '''
+    # Print the heading for the dummy elements
     print('**\
          \n** Make the dummy mesh used for visualization. These dummy elements\
          \n** use the same nodes as the real mesh, but note the offset in\
@@ -121,6 +144,7 @@ def dummmy_elem(elem_act):
          \n**\
          \n**Element, type=CPE4' % c_dummy, file=f)
 
+    # Print the dummy elements nodes by an offset of c_dummy
     for key in elem_act:
         print(key + c_dummy, ', ',
               str(elem_act[key])[1:-1], sep='', file=f)
@@ -129,12 +153,16 @@ def dummmy_elem(elem_act):
                          list(elem_act.keys())[-1] + c_dummy), file=f)
 
 
-'''
-Define sets for boundary conditions
-'''
+def sets_for_BC(node):
+    '''
+    Define node sets and element sets for boundary conditions
 
+    **Parameters**
+        node: *dict*
 
-def set_for_BC(node):
+    **Return**
+        print in .txt file
+    '''
     print('**\
          \n** Sets used for BCs\
          \n**', file=f)
@@ -188,31 +216,92 @@ def set_for_BC(node):
         \n %d' % list(node.keys())[0], file=f)
 
 
-def BC():
+def draw_BC():
+    '''
+    Output the certain parameters in the parameter file to an excel file
+
+    **Parameters**
+        parameter_file: .txt
+
+    **Return**
+        excel file: output_parameters.xlsx
+    '''
+    # Create an image
     im = Image.new('RGB', (2000, 2000), (225, 225, 225))
     draw = ImageDraw.Draw(im)
-    draw.rectangle((200, 1000, 200 + 100000 * length, 1000 + 100000 * height),
-                   fill=(0, 0, 0), outline=(180, 255, 255))
+    scale = 100000
+    # Define the corner coordinates of the bilayer part
+    rect_x_start = 200
+    rect_y_start = 1000
+    rect_x_end = rect_x_start + scale * length
+    rect_y_end = rect_y_start + scale * height
+
+    # Define the corner coordinates of the active layer
+    rect_act = (rect_x_start, rect_y_start, rect_x_start + scale * length,
+                rect_y_start + scale * height_act)
+    draw.rectangle(rect_act, outline=(0, 0, 0), width=5)
+
+    # Define the corner coordinates of the passive layer
+    rect_pas = (rect_x_start, rect_y_start + scale * height_act,
+                rect_x_start + scale * length,
+                rect_y_start + scale * height_act + scale * height_pas)
+    draw.rectangle(rect_pas, outline=(0, 0, 0), width=5)
+
+    # Draw the rigid surface below the bilayer part
+    extend = 100
+    draw.line((rect_x_start - extend, rect_y_end, rect_x_end + extend,
+               rect_y_end), fill=(0, 0, 255), width=5)
+
+    # Draw the boundary condition at both sides of the bilayer part
+    tri = 20
+    draw.polygon([(rect_x_start, rect_y_end), (rect_x_start - tri,
+                                               rect_y_end + tri * 2),
+                  (rect_x_start + tri,
+                   rect_y_end + tri * 2)],
+                 fill=(255, 0, 0))
+    draw.polygon([(rect_x_end, rect_y_end), (rect_x_end - tri,
+                                             rect_y_end + tri * 2),
+                  (rect_x_end + tri,
+                   rect_y_end + tri * 2)],
+                 fill=(255, 0, 0))
+
     im.save('output_BC.jpg')
 
 
-def excel():
+def parameter(parameters_file):
+    '''
+    Output the certain parameters in the parameter file to an excel file
 
+    **Parameters**
+        parameter_file: .txt
+
+    **Return**
+        excel file: output_parameters.xlsx
+        parameter: *dict*
+    '''
+    # Define the parameter list that will be output in the excel file
+    parameter_list = ['phi0 =', 'theta0 = ', 'thetaHot =', 'initMU =']
+
+    # Create excel file
+    f_input = open(parameters_file, 'r')
     workbook = Workbook()
     sheet = workbook.active
     sheet['A1'], sheet['B1'] = 'Parameters', 'Values'
+
+    # Define styles of cells
     bold_font = Font(bold=True)
     grey_fill = PatternFill(fgColor='C0C0C0', fill_type='solid')
     for cell in sheet["1:1"]:
         cell.font = bold_font
         cell.fill = grey_fill
+
+    # Save the parameters in a dict
     parameter = dict()
-    parameter_list = ['phi0 =', 'theta0 = ', 'thetaHot =', 'initMU =']
     for line in f_input:
         if any(param in line for param in parameter_list):
             parameter.update(
                 {list(line.split('='))[0]: list(line.split('='))[-1]})
-
+    # Input the paramter names and values into the excel
     row_cell = 2
     column_cell = 1
     for key in parameter:
@@ -220,19 +309,24 @@ def excel():
         sheet.cell(row=row_cell, column=column_cell + 1).value = parameter[key]
         row_cell += 1
 
+    f_input.close()
     workbook.save(filename="output_parameters.xlsx")
+
+    return parameter
 
 
 if __name__ == "__main__":
+    # Output an txt file for geometry information
     f = open('output_geometry.txt', 'w')
+    geometry_file = 'output_geometry.txt'
     node = node()
     elem_pas, elem_act = elem()
     dummmy_elem(elem_act)
-    set_for_BC(node)
+    sets_for_BC(node)
     f.close()
 
-    BC()
+    # Output an image file for boundary conditions
+    draw_BC()
 
-    f_input = open('04_04.txt', 'r')
-    excel()
-    f_input.close()
+    # Output an excel file for parameters in the file
+    parameter('Parameter.txt')
