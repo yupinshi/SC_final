@@ -11,7 +11,7 @@ The project is used to assist my research on finite element modeling. I am using
 * Draw a diagram for the boundary conditions
 * Run the input file and subroutine in command line
 
-To run the model with different geometry, I need to redraw the geometry in ABAQUS and redefine the node sets and element sets. In order to save time, I wrote this python code that automatically generate the input file that contains the geometry information without using the user interface. 
+To perform parametery by changing the height of the active layer and the passive layer, I need to redraw the geometry in ABAQUS and redefine the node sets and element sets. In order to save time, I wrote this python code that automatically generate the input file that contains the geometry information without using the user interface. 
 
 ## What does the code do
 * Generate in a txt file that includes the following geometry information:
@@ -19,4 +19,8 @@ To run the model with different geometry, I need to redraw the geometry in ABAQU
   * element nodes
   * node/elemnts sets for boundary conditions
 * Generate an image that illustrate the boundary conditions
-* Generate an excel file that lists the important parameters
+* Generate an excel file that lists the important parameters in the Parameter.txt file
+
+## How to run the code
+Both heights of the active layer and the passive layer are set to different values to generate the geometry for parameter study. In the first section, global constants defined. Change the height_pas and height_act in this section to 0.0004/0.0008/0.0012/0.0016.
+Example outputs are included in file: example_output
